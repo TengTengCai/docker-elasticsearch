@@ -1,0 +1,91 @@
+version: '3.3'
+services:
+  es01:
+    image: elasticsearch:7.11.1
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    container_name: es01
+    privileged: true
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - gateway.auto_import_dangling_indices=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - "data01:/usr/share/elasticsearch/data"
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+
+  es02:
+    image: elasticsearch:7.11.1
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 2G
+        reservations:
+          cpus: '0.25'
+          memory: 512M    
+    container_name: es02
+    privileged: true
+    environment:
+      - node.name=es02
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - gateway.auto_import_dangling_indices=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - "data02:/usr/share/elasticsearch/data"
+    networks:
+      - elastic
+
+  es03:
+    image: elasticsearch:7.11.1
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 2G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    container_name: es03
+    privileged: true
+    environment:
+      - node.name=es03
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - gateway.auto_import_dangling_indices=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - "data03:/usr/share/elasticsearch/data"
+    networks:
+      - elastic
+
+volumes:
+  data01:
+    driver: local
+  data02:
+    driver: local
+  data03:
+    driver: local
+
+networks:
+  elastic:
+    driver: bridge
+
